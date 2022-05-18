@@ -1,21 +1,27 @@
-use std::ops::{Add, Div, Mul, Sub};
 use core::fmt;
+use std::ops::{Add, Div, Mul, Sub};
 pub struct FieldElement {
-    num: i32,
-    prime: i32,
+    pub num: i32,
+    pub prime: i32,
 }
 
 impl FieldElement {
     pub fn new(_num: i32, _prime: i32) -> FieldElement {
+        if _num > _prime || _num < 0 {
+            panic!("A field element's num attribute should be lower than its prime and greater than 0!");
+        }
         return FieldElement {
             num: _num,
             prime: _prime,
         };
     }
-    pub fn power(self, power: i32) -> Self{
+    pub fn power(self, power: i32) -> Self {
         let n: i32 = power % (self.prime - 1);
         let num = i32::pow(self.num, n as u32) % self.prime;
-        return FieldElement { num: num, prime: self.prime };
+        return FieldElement {
+            num: num,
+            prime: self.prime,
+        };
     }
 }
 
