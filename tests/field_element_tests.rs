@@ -1,23 +1,30 @@
 #[cfg(test)]
-mod tests {
+mod FieldElementTests {
     use programming_bitcoin::finite_field::FieldElement;
 
     #[test]
-    fn field_addition_simple() {
+    fn addition_simple() {
         let elem_0 = FieldElement::new(1, 2);
         let elem_1 = FieldElement::new(1, 2);
         let addition: FieldElement = elem_0 + elem_1;
         assert_eq!(addition.num, 0)
     }
     #[test]
-    fn field_substraction_simple() {
+    fn addition_greater_than_field() {
+        let elem_0 = FieldElement::new(4, 5);
+        let elem_1 = FieldElement::new(3, 5);
+        let addition: FieldElement = elem_0 + elem_1;
+        assert_eq!(addition.num, 2)
+    }
+    #[test]
+    fn substraction_simple() {
         let elem_0 = FieldElement::new(6, 7);
         let elem_1 = FieldElement::new(1, 7);
         let addition: FieldElement = elem_0 - elem_1;
         assert_eq!(addition.num, 5)
     }
     #[test]
-    fn field_multiplication_simple() {
+    fn multiplication_simple() {
         let elem_0 = FieldElement::new(6, 7);
         let elem_1 = FieldElement::new(2, 7);
         let mul: FieldElement = elem_0 * elem_1;
@@ -31,7 +38,7 @@ mod tests {
         let _ = elem_0 + elem_1;
     }
     #[test]
-    fn field_div_simple() {
+    fn div_simple() {
         let elem_0 = FieldElement::new(6, 7);
         let elem_1 = FieldElement::new(4, 7);
         println!("{}", elem_0);
@@ -40,7 +47,7 @@ mod tests {
         assert_eq!(one.num, 1);
     }
     #[test]
-    fn field_power_test() {
+    fn power_test() {
         let mut elem_0 = FieldElement::new(3, 5);
         assert_eq!(elem_0.power(5).num, 3);
     }
