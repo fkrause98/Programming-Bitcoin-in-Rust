@@ -1,21 +1,21 @@
 use core::ops::Add;
-#[derive(PartialEq)]
-#[derive(Clone)]
-pub enum Number {
+#[derive(PartialEq, Clone, Copy, Debug)]
+pub enum Num {
     NonInf(isize),
-    Infinity,
+    Inf,
 }
+#[derive(Clone, Debug)]
 pub struct Point {
     pub a: isize,
     pub b: isize,
-    pub x: Number,
-    pub y: Number,
+    pub x: Num,
+    pub y: Num,
 }
 impl Point {
-    pub fn new(x: Number, y: Number, a: isize, b: isize) -> Result<Point, String> {
+    pub fn new(x: Num, y: Num, a: isize, b: isize) -> Result<Point, String> {
         match (&x, &y) {
-            (Number::Infinity, Number::Infinity) => Ok(Point { a, b, x, y }),
-            (Number::NonInf(x_int), Number::NonInf(y_int)) => {
+            (Num::Inf, Num::Inf) => Ok(Point { a, b, x, y }),
+            (Num::NonInf(x_int), Num::NonInf(y_int)) => {
                 let left_side = y_int.pow(2);
                 println!("Left side {}", left_side);
                 let right_side = (x_int.pow(3)) + (a * x_int) + b;
@@ -34,24 +34,32 @@ impl Point {
         }
     }
 }
-// impl Add for Point{
-//     type Output = Self;
-//     // fn do_addition(self, other: Self) -> (Number, Number){
-//     //     // match (self.x, other.x)
-//     // }
-//     // fn add(self, other: Self) -> Result<Self, String>{
-//     //     if self.a != other.a && self.b != other.b {
-//     //         return Err("Points are not on the same curve").to_string();
-//     //     }
-//     //     let result = match (self, other) {
-//     //         (Number::Infinity, _) => self,
-//     //         (_, Number::Infinity) => other,
-//     //         (_, _) => (1, 1)
-//     //             // do_addition(self, other: Self)
-//     //     };
-//     //     return Ok(result);
-//     // }
-// }
+impl Add for Point{
+    type Output = Result<Self, String>;
+    fn add(self, other: Self) -> Result<Self, String>{
+        if self.a != other.a && self.b != other.b {
+            return Err(("Points are not on the same curve").to_string());
+        }
+        let result = match (self.x, other.x, self.y, other.y) {
+            (Num::Inf, _, _, _) => self,
+            (_, Num::Inf, _, _ ) => other,
+            (Num::NonInf(x_1), Num::NonInf(x_2), Num::NonInf(y_1), Num::NonInf(y_2)) => {
+                let (new_x, new_y) = do_addition(x_1, x_2, y_1, y_2);
+                return Point::new(new_x, new_y, self.a, self.b, );
+            }
+            _ => unsafe {std::hint::unreachable_unchecked()}
+        };
+        return Ok(result);
+    }
+}
+fn do_addition(x_1: isize, x_2: isize, y_1: isize,  y_2: isize) -> (Num, Num){
+    let same_x = x_1 == x_2;
+    let additive_inverses = same_x && y_1 != y_2;
+    let result = if additive_inverses{
+        return (Num::Inf, Num::Inf);
+    };
+    return ((Num::NonInf(1), Num::NonInf(1)))
+}
 impl PartialEq for Point {
     fn eq(&self, other: &Self) -> bool {
         let equal = (self.a == other.a)

@@ -46,7 +46,7 @@ mod FieldElementTests {
     }
     #[test]
     fn power_test() {
-        let mut elem_0 = FieldElement::new(3, 5);
+        let elem_0 = FieldElement::new(3, 5);
         assert_eq!(elem_0.power(5).num, 3);
     }
 }
