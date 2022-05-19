@@ -41,8 +41,6 @@ mod FieldElementTests {
     fn div_simple() {
         let elem_0 = FieldElement::new(6, 7);
         let elem_1 = FieldElement::new(4, 7);
-        println!("{}", elem_0);
-        println!("{}", elem_1);
         let one = elem_0 / elem_1;
         assert_eq!(one.num, 1);
     }
