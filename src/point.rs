@@ -55,10 +55,10 @@ impl Add for Point{
 fn do_addition(x_1: isize, x_2: isize, y_1: isize,  y_2: isize) -> (Num, Num){
     let same_x = x_1 == x_2;
     let additive_inverses = same_x && y_1 != y_2;
-    let result = if additive_inverses{
+    let _result = if additive_inverses{
         return (Num::Inf, Num::Inf);
     };
-    return ((Num::NonInf(1), Num::NonInf(1)))
+    return (Num::NonInf(1), Num::NonInf(1));
 }
 impl PartialEq for Point {
     fn eq(&self, other: &Self) -> bool {
