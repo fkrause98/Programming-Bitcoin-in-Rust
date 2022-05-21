@@ -51,22 +51,26 @@ impl Add for Point {
 fn do_addition(x_1: isize, x_2: isize, y_1: isize, y_2: isize, a: isize) -> (Option<isize>, Option<isize>) {
     let same_x = x_1 == x_2;
     let additive_inverses = same_x && y_1 != y_2;
-    if x_1 == x_2 && y_1 == y_2 && y_1 == 0 {
-        return (None, None);
-    }
+    let equal = (x_1 == x_2) && (y_1 == y_2);
     if additive_inverses {
         return (None, None);
     }
-    let slope = if !same_x {
-        (y_2 - y_1) / (x_2 - x_1)
-    } else if x_1 == -x_2 {
-        (3 * (x_1.pow(2)) + a) / (2 * y_1)
-    } else {
-        0
-    };
-    let x_3 = slope.pow(2) - x_1 - x_2;
-    let y_3 = (slope * (x_1 - x_3)) - y_1;
-    return (Some(x_3), Some(y_3));
+    if !same_x{
+        let slope = (y_2 - y_1)/(x_2 - x_1);
+        let x_3 = (slope.pow(2)) - x_1 - x_2;
+        let y_3 = slope*(x_1 - x_3) - y_1;
+        return (Some(x_3), Some(y_3))
+    }
+    if equal && y_1 == 0 {
+       return (None, None)
+    }
+    if equal{
+        let slope = (3*(x_1.pow(2)) + a)/(2*y_1);
+        let x_3 = (slope.pow(2)) - (2 * x_1);
+        let y_3 = slope*(x_1 - x_3) - y_1;
+        return (Some(x_3), Some(y_3))
+    }
+    return (None, None)
 }
 impl PartialEq for Point {
     fn eq(&self, other: &Self) -> bool {

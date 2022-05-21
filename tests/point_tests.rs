@@ -54,6 +54,13 @@ mod point {
         let b = a.clone();
         let result = (a + b).unwrap();
         let expected = Point::new(Some(18), Some(77), 5, 7).unwrap();
-        // assert_eq!(expected, result);
+        assert_eq!(expected, result);
+    }
+    #[test]
+    fn not_equal() {
+        let a = Point::new(Some(3), Some(-7), 5, 7);
+        let b = Point::new(Some(18), Some(77), 5, 7);
+        assert!(a != b);
+        assert!(a == a);
     }
 }
