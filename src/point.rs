@@ -34,31 +34,36 @@ impl Point {
         }
     }
 }
-impl Add for Point{
+impl Add for Point {
     type Output = Result<Self, String>;
-    fn add(self, other: Self) -> Result<Self, String>{
+    fn add(self, other: Self) -> Result<Self, String> {
         if self.a != other.a && self.b != other.b {
             return Err(("Points are not on the same curve").to_string());
         }
         let result = match (self.x, other.x, self.y, other.y) {
             (Num::Inf, _, _, _) => self,
-            (_, Num::Inf, _, _ ) => other,
+            (_, Num::Inf, _, _) => other,
             (Num::NonInf(x_1), Num::NonInf(x_2), Num::NonInf(y_1), Num::NonInf(y_2)) => {
                 let (new_x, new_y) = do_addition(x_1, x_2, y_1, y_2);
-                return Point::new(new_x, new_y, self.a, self.b, );
+                return Point::new(new_x, new_y, self.a, self.b);
             }
-            _ => unsafe {std::hint::unreachable_unchecked()}
+            _ => unsafe { std::hint::unreachable_unchecked() },
         };
         return Ok(result);
     }
 }
-fn do_addition(x_1: isize, x_2: isize, y_1: isize,  y_2: isize) -> (Num, Num){
+fn do_addition(x_1: isize, x_2: isize, y_1: isize, y_2: isize) -> (Num, Num) {
     let same_x = x_1 == x_2;
     let additive_inverses = same_x && y_1 != y_2;
-    let _result = if additive_inverses{
+    let _result = if additive_inverses {
         return (Num::Inf, Num::Inf);
+    } else {
+        let slope = (y_2 - y_1) / (x_2 - x_1);
+        let x_3 = slope.pow(2) - x_1 - x_2;
+        let y_3 = (slope * (x_1 - x_3)) - y_1;
+        println!("new x {} , new y {}", x_3, y_3);
+        return (Num::NonInf(x_3), Num::NonInf(y_3));
     };
-    return (Num::NonInf(1), Num::NonInf(1));
 }
 impl PartialEq for Point {
     fn eq(&self, other: &Self) -> bool {
