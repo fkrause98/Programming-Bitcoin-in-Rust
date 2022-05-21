@@ -1,26 +1,22 @@
 use core::ops::Add;
-#[derive(PartialEq, Clone, Copy, Debug)]
-pub enum Num {
-    NonInf(isize),
-    Inf,
-}
 #[derive(Clone, Debug)]
 pub struct Point {
     pub a: isize,
     pub b: isize,
-    pub x: Num,
-    pub y: Num,
+    pub x: Option<isize>,
+    pub y: Option<isize>,
 }
 impl Point {
-    pub fn new(x: Num, y: Num, a: isize, b: isize) -> Result<Point, String> {
+    pub fn new(x: Option<isize>, y: Option<isize>, a: isize, b: isize) -> Result<Point, String> {
         match (&x, &y) {
-            (Num::Inf, Num::Inf) => Ok(Point { a, b, x, y }),
-            (Num::NonInf(x_int), Num::NonInf(y_int)) => {
+            (None, None) => Ok(Point { a, b, x, y }),
+            (Some(x_int), Some(y_int)) => {
                 let left_side = y_int.pow(2);
                 println!("Left side {}", left_side);
                 let right_side = (x_int.pow(3)) + (a * x_int) + b;
                 println!("Right side {}", right_side);
                 let not_in_curve = left_side != right_side;
+                println!("Equal? {}", !not_in_curve);
                 if not_in_curve {
                     Err(format!(
                         "({}, {}) is outside the curve!",
@@ -41,10 +37,10 @@ impl Add for Point {
             return Err(("Points are not on the same curve").to_string());
         }
         let result = match (self.x, other.x, self.y, other.y) {
-            (Num::Inf, _, _, _) => self,
-            (_, Num::Inf, _, _) => other,
-            (Num::NonInf(x_1), Num::NonInf(x_2), Num::NonInf(y_1), Num::NonInf(y_2)) => {
-                let (new_x, new_y) = do_addition(x_1, x_2, y_1, y_2);
+            (None, _, _, _) => self,
+            (_, None, _, _) => other,
+            (Some(x_1), Some(x_2), Some(y_1), Some(y_2)) => {
+                let (new_x, new_y) = do_addition(x_1, x_2, y_1, y_2, self.a);
                 return Point::new(new_x, new_y, self.a, self.b);
             }
             _ => unsafe { std::hint::unreachable_unchecked() },
@@ -52,18 +48,25 @@ impl Add for Point {
         return Ok(result);
     }
 }
-fn do_addition(x_1: isize, x_2: isize, y_1: isize, y_2: isize) -> (Num, Num) {
+fn do_addition(x_1: isize, x_2: isize, y_1: isize, y_2: isize, a: isize) -> (Option<isize>, Option<isize>) {
     let same_x = x_1 == x_2;
     let additive_inverses = same_x && y_1 != y_2;
-    let _result = if additive_inverses {
-        return (Num::Inf, Num::Inf);
+    if x_1 == x_2 && y_1 == y_2 && y_1 == 0 {
+        return (None, None);
+    }
+    if additive_inverses {
+        return (None, None);
+    }
+    let slope = if !same_x {
+        (y_2 - y_1) / (x_2 - x_1)
+    } else if x_1 == -x_2 {
+        (3 * (x_1.pow(2)) + a) / (2 * y_1)
     } else {
-        let slope = (y_2 - y_1) / (x_2 - x_1);
-        let x_3 = slope.pow(2) - x_1 - x_2;
-        let y_3 = (slope * (x_1 - x_3)) - y_1;
-        println!("new x {} , new y {}", x_3, y_3);
-        return (Num::NonInf(x_3), Num::NonInf(y_3));
+        0
     };
+    let x_3 = slope.pow(2) - x_1 - x_2;
+    let y_3 = (slope * (x_1 - x_3)) - y_1;
+    return (Some(x_3), Some(y_3));
 }
 impl PartialEq for Point {
     fn eq(&self, other: &Self) -> bool {
