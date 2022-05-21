@@ -12,11 +12,8 @@ impl Point {
             (None, None) => Ok(Point { a, b, x, y }),
             (Some(x_int), Some(y_int)) => {
                 let left_side = y_int.pow(2);
-                println!("Left side {}", left_side);
                 let right_side = (x_int.pow(3)) + (a * x_int) + b;
-                println!("Right side {}", right_side);
                 let not_in_curve = left_side != right_side;
-                println!("Equal? {}", !not_in_curve);
                 if not_in_curve {
                     Err(format!(
                         "({}, {}) is outside the curve!",
