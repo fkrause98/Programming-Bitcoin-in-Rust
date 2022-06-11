@@ -1,3 +1,4 @@
+use crate::finite_field::FieldElement;
 use crate::power::Pow;
 use std::{
     fmt::Display,

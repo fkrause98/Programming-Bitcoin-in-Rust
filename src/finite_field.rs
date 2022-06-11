@@ -1,5 +1,6 @@
 use core::fmt;
 use std::ops::{Add, Div, Mul, Sub};
+#[derive(Clone, Copy)]
 pub struct FieldElement {
     pub num: isize,
     pub prime: isize,
@@ -22,56 +23,66 @@ fn same_field(_num_0: &FieldElement, _num_1: &FieldElement) -> bool {
 }
 
 impl Add for FieldElement {
-    type Output = Result<Self, String>;
-    fn add(self, other: Self) -> Result<Self, String> {
+    type Output = Self;
+    fn add(self, other: Self) -> Self {
         if !same_field(&self, &other) {
-            return Err("Can't add elements from different prime fields".to_string());
+            panic!("Can't add elements from different prime fields");
         }
-        return Ok(FieldElement {
+        return FieldElement {
             num: (self.num + other.num) % self.prime,
             prime: self.prime,
-        });
+        };
+    }
+}
+
+impl Add<isize> for FieldElement {
+    type Output = Self;
+    fn add(self, rhs: isize) -> Self {
+        return FieldElement {
+            num: (self.num + rhs) % self.prime,
+            prime: self.prime,
+        };
     }
 }
 
 impl Sub for FieldElement {
-    type Output = Result<Self, String>;
-    fn sub(self, other: Self) -> Result<Self, String> {
+    type Output = Self;
+    fn sub(self, other: Self) -> Self {
         if !same_field(&self, &other) {
-            return Err("Can't substract elements from different prime fields".to_string());
+            panic!("Can't substract elements from different prime fields");
         }
         let result = (self.num - other.num) % self.prime;
-        return Ok(FieldElement {
+        return FieldElement {
             num: result,
             prime: self.prime,
-        });
+        };
     }
 }
 
 impl Mul for FieldElement {
-    type Output = Result<Self, String>;
-    fn mul(self, other: Self) -> Result<Self, String> {
+    type Output = Self;
+    fn mul(self, other: Self) -> Self {
         if !same_field(&self, &other) {
-            return Err("Can't multiply elements from different prime fields".to_string());
+            panic!("Can't multiply elements from different prime fields");
         }
         let result = (self.num * other.num) % self.prime;
-        return Ok(FieldElement {
+        return FieldElement {
             num: result,
             prime: (self.prime),
-        });
+        };
     }
 }
 impl Div for FieldElement {
-    type Output = Result<Self, String>;
-    fn div(self, other: Self) -> Result<Self, String> {
+    type Output = Self;
+    fn div(self, other: Self) -> Self {
         if !same_field(&self, &other) {
-            return Err("Cant divide multiple elements from different prime fields".to_string());
+            panic!("Cant divide multiple elements from different prime fields");
         }
         let result = (self.num / other.num) % self.prime;
-        return Ok(FieldElement {
+        return FieldElement {
             num: result,
             prime: self.prime,
-        });
+        };
     }
 }
 impl PartialEq for FieldElement {
