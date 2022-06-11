@@ -1,12 +1,12 @@
 use core::fmt;
-use std::{ops::{Add, Div, Mul, Sub}, process::Output};
+use std::ops::{Add, Div, Mul, Sub};
 pub struct FieldElement {
-    pub num: i32,
-    pub prime: i32,
+    pub num: isize,
+    pub prime: isize,
 }
 
 impl FieldElement {
-    pub fn new(_num: i32, _prime: i32) -> Result<Self, String> {
+    pub fn new(_num: isize, _prime: isize) -> Result<Self, String> {
         if _num > _prime || _num < 0 {
             return Err("A field element's num attribute should be lower than its prime and greater than 0!".to_string());
         }
@@ -14,14 +14,6 @@ impl FieldElement {
             num: _num,
             prime: _prime,
         });
-    }
-    pub fn power(self, power: i32) -> Self {
-        let n: i32 = power % (self.prime - 1);
-        let num = i32::pow(self.num, n as u32) % self.prime;
-        return FieldElement {
-            num,
-            prime: self.prime,
-        };
     }
 }
 
@@ -91,5 +83,13 @@ impl PartialEq for FieldElement {
 impl fmt::Display for FieldElement {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{} in field {}", self.num, self.prime)
+    }
+}
+
+impl Mul<isize> for FieldElement {
+    type Output = FieldElement;
+    fn mul(self, rhs: isize) -> FieldElement {
+        let result = (rhs * self.num) % self.prime;
+        return FieldElement::new(result, self.prime).unwrap();
     }
 }

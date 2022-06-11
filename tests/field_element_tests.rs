@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod field_element_tests {
+    use programming_bitcoin::power::Pow;
     use programming_bitcoin::finite_field::FieldElement;
 
     #[test]

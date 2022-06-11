@@ -42,10 +42,7 @@ mod point {
         let point_0 = Point::new(Some(3), Some(7), 5, 7).unwrap();
         let point_1 = Point::new(Some(-1), Some(-1), 5, 7).unwrap();
         let result = (point_0.clone() + point_1.clone()).unwrap();
-        assert_eq!(
-            result,
-            Point::new(Some(2), Some(-5), 5, 7).unwrap()
-        );
+        assert_eq!(result, Point::new(Some(2), Some(-5), 5, 7).unwrap());
     }
     // Tests taken from the books' repo.
     #[test]

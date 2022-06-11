@@ -1,18 +1,39 @@
-use core::ops::Add;
+use crate::power::Pow;
+use std::{
+    fmt::Display,
+    ops::{Add, Div, Mul, Sub},
+};
 #[derive(Clone, Debug)]
-pub struct Point {
-    pub a: isize,
-    pub b: isize,
-    pub x: Option<isize>,
-    pub y: Option<isize>,
+pub struct Point<T> {
+    pub a: T,
+    pub b: T,
+    pub x: Option<T>,
+    pub y: Option<T>,
 }
-impl Point {
-    pub fn new(x: Option<isize>, y: Option<isize>, a: isize, b: isize) -> Result<Point, String> {
-        match (&x, &y) {
-            (None, None) => Ok(Point { a, b, x, y }),
+impl<
+        T: Pow
+            + Mul<T, Output = T>
+            + Mul<isize, Output = T>
+            + PartialEq
+            + Add<T, Output = T>
+            + Add<isize, Output = T>
+            + Display
+            + Copy,
+    > Point<T>
+{
+    pub fn new(x: Option<T>, y: Option<T>, a: T, b: T) -> Result<Point<T>, String> {
+        match (x, y) {
+            (None, None) => Ok(Point {
+                a: a,
+                b: a,
+                x: None,
+                y: None,
+            }),
             (Some(x_int), Some(y_int)) => {
-                let left_side = y_int.pow(2);
-                let right_side = (x_int.pow(3)) + (a * x_int) + b;
+                let left_side = y_int.power(2);
+                let x_times_a = x_int * a;
+                let x_plus_b = x_times_a + b;
+                let right_side = (x_int.power(3)) + x_plus_b;
                 let not_in_curve = left_side != right_side;
                 if not_in_curve {
                     Err(format!(
@@ -27,49 +48,58 @@ impl Point {
         }
     }
 }
-impl Add for Point {
+impl<
+        T: PartialEq<isize>
+            + PartialEq<T>
+            + Add<T, Output = T>
+            + Mul<T, Output = T>
+            + Pow
+            + Mul<isize, Output = T>
+            + Div<T, Output = T>
+            + Sub<T, Output = T>
+            + Add<isize, Output = T>
+            + Display
+            + Copy,
+    > Add for Point<T>
+{
     type Output = Result<Self, String>;
     fn add(self, other: Self) -> Result<Self, String> {
         if self.a != other.a && self.b != other.b {
             return Err(("Points are not on the same curve").to_string());
         }
-        let result = match (self.x, other.x, self.y, other.y) {
-            (None, _, _, _) => self,
-            (_, None, _, _) => other,
+        return match (self.x, other.x, self.y, other.y) {
+            (None, _, _, _) => Point::new(self.x, self.y, self.a, self.b),
+            (_, None, _, _) => Point::new(other.x, other.y, self.a, self.b),
             (Some(x_1), Some(x_2), Some(y_1), Some(y_2)) => {
-                let (new_x, new_y) = do_addition(x_1, x_2, y_1, y_2, self.a);
-                return Point::new(new_x, new_y, self.a, self.b);
+                let same_x = x_1 == x_2;
+                let additive_inverses = same_x && y_1 != y_2;
+                let equal = (x_1 == x_2) && (y_1 == y_2);
+                if additive_inverses {
+                    return Point::new(None, None, self.a, self.b);
+                }
+                if !same_x {
+                    let slope = (y_2 - y_1) / (x_2 - x_1);
+                    let x_3 = (slope.power(2)) - x_1 - x_2;
+                    let y_3 = slope * (x_1 - x_3) - y_1;
+                    return Point::new(Some(x_3), Some(y_3), self.a, self.b);
+                }
+                if equal && y_1 == 0 {
+                    return Point::new(None, None, self.a, self.b);
+                }
+                if equal {
+                    let slope = ((x_1.power(2) * 3) + self.a) / (y_1 * 2);
+                    let x_3 = (slope.power(2)) - (x_1 * 2);
+                    let y_3 = slope * (x_1 - x_3) - y_1;
+                    return Point::new(Some(x_3), Some(y_3), self.a, self.b);
+                }
+                let inf: Result<Point<T>, String> = Point::new(None, None, self.a, self.b);
+                return inf;
             }
             _ => unsafe { std::hint::unreachable_unchecked() },
         };
-        return Ok(result);
     }
 }
-fn do_addition(x_1: isize, x_2: isize, y_1: isize, y_2: isize, a: isize) -> (Option<isize>, Option<isize>) {
-    let same_x = x_1 == x_2;
-    let additive_inverses = same_x && y_1 != y_2;
-    let equal = (x_1 == x_2) && (y_1 == y_2);
-    if additive_inverses {
-        return (None, None);
-    }
-    if !same_x{
-        let slope = (y_2 - y_1)/(x_2 - x_1);
-        let x_3 = (slope.pow(2)) - x_1 - x_2;
-        let y_3 = slope*(x_1 - x_3) - y_1;
-        return (Some(x_3), Some(y_3))
-    }
-    if equal && y_1 == 0 {
-       return (None, None)
-    }
-    if equal{
-        let slope = (3*(x_1.pow(2)) + a)/(2*y_1);
-        let x_3 = (slope.pow(2)) - (2 * x_1);
-        let y_3 = slope*(x_1 - x_3) - y_1;
-        return (Some(x_3), Some(y_3))
-    }
-    return (None, None)
-}
-impl PartialEq for Point {
+impl PartialEq for Point<isize> {
     fn eq(&self, other: &Self) -> bool {
         let equal = (self.a == other.a)
             && (self.b == other.b)
